@@ -11,6 +11,7 @@ use Yii;
 use yii\base\Component;
 use yii\web\Response;
 use yii\web\ResponseFormatterInterface;
+use Mpdf\Mpdf;
 
 /**
  * PdfResponseFormatter formats the given HTML data into a PDF response content.
@@ -73,18 +74,39 @@ class PdfResponseFormatter extends Component implements ResponseFormatterInterfa
 	 */
 	protected function formatPdf($response)
 	{
-		$mpdf = new \mPDF($this->mode,
-			$this->format,
-			$this->defaultFontSize,
-			$this->defaultFont,
-			$this->marginLeft,
-			$this->marginRight,
-			$this->marginTop,
-			$this->marginBottom,
-			$this->marginHeader,
-			$this->marginFooter,
-			$this->orientation
-		);
+		try{
+			//try for mpdf v7+
+			$mpdf = new Mpdf([$this->mode,
+				$this->format,
+				$this->defaultFontSize,
+				$this->defaultFont,
+				$this->marginLeft,
+				$this->marginRight,
+				$this->marginTop,
+				$this->marginBottom,
+				$this->marginHeader,
+				$this->marginFooter,
+				$this->orientation
+			]);
+		}
+		catch (\Exception $exception)
+                {
+			//old way for old mpdf versions
+			//bakwards compatibility
+			$mpdf = new \mPDF($this->mode,
+				$this->format,
+				$this->defaultFontSize,
+				$this->defaultFont,
+				$this->marginLeft,
+				$this->marginRight,
+				$this->marginTop,
+				$this->marginBottom,
+				$this->marginHeader,
+				$this->marginFooter,
+				$this->orientation
+			);
+		
+		}
 
 		foreach ($this->options as $key => $option) {
 			$mpdf->$key = $option;
